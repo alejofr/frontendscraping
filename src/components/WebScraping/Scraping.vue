@@ -50,11 +50,12 @@
                     <div class="w-100 h-100" v-show="estado == false">
                         <div class="d-flex justify-content-center align-items-center w-100 h-100">
                             <div class="content-container text-center" >
-                                <div class="icon-view">
+                                <div class="icon-view" v-show="carga == false">
                                     <i class="icon-contenido"></i>
                                 </div>
                                 <div class="mt-2">
-                                    <p>No hay contenido para mostrar</p>
+                                    <p v-show="carga == false" >No hay contenido para mostrar</p>
+                                    <b-spinner v-show="carga == true" type="grow"></b-spinner>
                                 </div>
                             </div>
                         </div>
@@ -88,18 +89,9 @@ export default {
           categories:[],
           estado: false,
           stateProd: false,
-          stateCate: false
+          stateCate: false,
+          carga: false
       }
-  },
-  created(){
-     this.axios
-      .get('https://api.mercadolibre.com/categories/MLA1055')
-        .then(response => {
-          console.log(response.data)
-        })
-        .catch(error => {
-          console.log(error)
-      });
   },
   methods: {
       viewShow: function(e){
@@ -114,11 +106,13 @@ export default {
               aCat.classList.add('active');
       },
       searchProducts: function(){
-          let url = this.searchProd;
-          this.stateCate = false;
-          this.estado = true;
+          let url = { 
+              'url' : this.searchProd
+            };
+          this.carga = true;
+        
 
-          fetch('http://localhost:5050/scraping-prod', {
+          /*fetch('http://75.102.23.33:3000/scraping-prod', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -129,10 +123,31 @@ export default {
             }).then(response => response.json())
             .then(data => { 
                 console.log(data.data)
+                this.stateCate = false;
+                this.estado = true;
+
                 this.producto = data.data;
                 this.stateProd = true; 
-            })
+            })*/
 
+            
+             this.axios.post("http://localhost:5050/scraping-prod", url)
+            .then(response => {
+                console.log(response.data.data)
+                this.stateCate = false;
+                this.estado = true;
+
+                this.producto = response.data.data;
+                this.carga = false;
+                this.stateProd = true; 
+            }) 
+            .catch(error => {
+                this.carga = false;
+                alert('Ocurrio Un error,por favor intentar más tarde');
+                this.errorMessage = error.message;
+                console.error("There was an error!", error);
+            });
+             
 
         },
         searchCateg: function(){
@@ -141,7 +156,7 @@ export default {
             this.estado = true;
             console.log(url);
 
-            fetch('http://localhost:5050/scraping-cate', {
+            fetch('http://75.102.23.33:3000/scraping-cate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

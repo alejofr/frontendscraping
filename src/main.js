@@ -15,6 +15,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import './assets/Icon/style.css';
 import './assets/css/app.css';
+//import { _ } from 'core-js'
 
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
@@ -46,8 +47,11 @@ if(to.meta.requiresAuth){
 axios.interceptors.request.use(function (config) {
 
   if ( auth.state.loginStatus ){
-    let headers ={};
-    headers.Authorization = "Bearer "+auth.state.token;
+    let headers = {
+       'Authorization' : "Bearer "+auth.state.token
+    };
+   // let headers = {};
+    //headers.Authorization = "Bearer "+auth.state.token;
     config['headers'] = headers;
   }
     console.log(config)

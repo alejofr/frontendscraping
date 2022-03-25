@@ -1,5 +1,10 @@
 <template>
-    <div style="padding: 40px 25px;">
+    <form style="padding: 40px 25px;" @submit.prevent="ProductForm">
+        <div class="form-group">
+            <b-alert v-model="showDismissibleAlert" variant="danger" class="closeButton" dismissible style="padding:15px;font-size:12px;">
+                {{ alert }}
+            </b-alert>
+        </div>
         <b-row style="margin:0;">
             <b-col cols="12" md="6">
                 <div class="form-box">
@@ -27,28 +32,35 @@
                     <label for="nameProd">$  Monto en pesos COL </label>
                 </div>
             </b-col>
+            <b-col cols="6" md="6" class="mt-4">
+                <div class="form-box">
+                    <select v-model="categoria" name="categoria" id="categMercadoLibre">
+                        <option v-for="(item, index) in categorias" v-bind:key="index" value="">{{ item.name }}</option>
+                    </select>
+                </div>
+            </b-col>
         </b-row>
         <div class="container_img">
             <carousel :items="5" :autoWidth="false" :nav="false"> 
-                <div class="card-img-prod" v-for="images in product.img" :key="images">
+                <div class="card-img-prod"  v-for="(value, index) in product.img" v-bind:key="index">
                     <div class="custom-control custom-checkbox image-checkbox">
-                        <input type="checkbox" class="custom-control-input position-absolute" id="ck1a">
-                        <label class="custom-control-label" for="ck1a">
-                            <img v-bind:src="images" alt="#" class="img-fluid">           
+                        <input type="checkbox" :value="value" :id="'img'+index" name="imagenes[]" v-model="imagenes" class="custom-control-input position-absolute">
+                        <label class="custom-control-label" :for="'img'+index">
+                            <img v-bind:src="value" alt="#" class="img-fluid">           
                         </label>
                     </div>
                 </div>
-                
             </carousel>
+            
         </div>
         <div class="mt-3">
             <div class="export-btn text-end">
-                <button type="button">
+                <button type="submit">
                     Exportar a mercadolibre
                 </button>
             </div>
         </div>  
-    </div>
+    </form>
     
 </template>
 
@@ -61,11 +73,36 @@ export default {
     name: 'ViewProd',
     data() {
         return {
-            images:[]
+            categorias: [],
+            categ: [],
+            categoria: '',
+            showDismissibleAlert:false,
+            alert: '',
+            imagenes: [],
         }
     },
-    components:{
+    created(){
+    if (localStorage.getItem('token')) {
+        let token = localStorage.getItem('token');
+         let url = 'https://panel.comprazapatos.com.mx/index.php?token='+token;
+         this.axios
+        .get(url)
+            .then(response => {
+                this.categorias = response.data;
+            console.log(response.data)
+            })
+            .catch(error => {
+            console.log(error)
+        });
+    }
+  },
+   components:{
         carousel
+    },
+    methods: {
+        ProductForm(){
+            console.log(this.images)
+        }
     }
 }
 </script>

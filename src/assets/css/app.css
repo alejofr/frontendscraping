@@ -33,7 +33,7 @@ input, textarea, label {
     position: relative;
   }
   
-  .form-box input {
+  .form-box input,   .form-box select  {
     width: 100%;
     padding: 10px 0;
     font-size: 16px;
