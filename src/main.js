@@ -29,6 +29,8 @@ const router = new VueRouter({
   routes: routes
 });
 
+console.log(process.env.VUE_APP_RUTA_SERVE);
+
 console.log(auth.state.loginStatus)
 
 router.beforeEach((to, from, next) => {

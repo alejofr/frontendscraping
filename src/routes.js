@@ -1,3 +1,4 @@
+
 export const routes = [
 	{
 		name: 'Scraping',
@@ -16,4 +17,4 @@ export const routes = [
 		path: '/login',
 		component:  () => import ('./components/Login.vue')
 	}
-]
+];

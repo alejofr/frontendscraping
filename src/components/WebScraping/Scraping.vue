@@ -106,46 +106,30 @@ export default {
               aCat.classList.add('active');
       },
       searchProducts: function(){
-          let url = { 
+            console.log(this.searchProd);
+            let url = { 
               'url' : this.searchProd
             };
-          this.carga = true;
-        
-
-          /*fetch('http://75.102.23.33:3000/scraping-prod', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    url: url
-                })
-            }).then(response => response.json())
-            .then(data => { 
-                console.log(data.data)
-                this.stateCate = false;
-                this.estado = true;
-
-                this.producto = data.data;
-                this.stateProd = true; 
-            })*/
-
+            this.stateCate = false;
+            this.estado = false;
+            this.stateProd = false; 
+            this.carga = true;
             
-             this.axios.post("http://localhost:5050/scraping-prod", url)
+             this.axios.post(process.env.VUE_APP_RUTA_SERVE + "scraping-prod", url)
             .then(response => {
-                console.log(response.data.data)
+                console.log(response)
                 this.stateCate = false;
                 this.estado = true;
 
                 this.producto = response.data.data;
                 this.carga = false;
-                this.stateProd = true; 
+                this.stateProd = true;
             }) 
             .catch(error => {
                 this.carga = false;
                 alert('Ocurrio Un error,por favor intentar más tarde');
                 this.errorMessage = error.message;
-                console.error("There was an error!", error);
+                console.error("There was an error!", this.errorMessage);
             });
              
 
@@ -156,7 +140,7 @@ export default {
             this.estado = true;
             console.log(url);
 
-            fetch('http://75.102.23.33:3000/scraping-cate', {
+            fetch(process.env.VUE_APP_RUTA_SERVE + "scraping-cate", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
