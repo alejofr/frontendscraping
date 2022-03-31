@@ -12,6 +12,9 @@ const auth =  new Vuex.Store({
         authStateUpdate(state){
             state.loginStatus = true;
         },
+        authStateUpdateFalse(state){
+            state.loginStatus = false;
+        },
         login(state, token){
             state.token = token;
             localStorage.setItem('token', token);
@@ -36,6 +39,8 @@ if (localStorage.getItem('token')) {
     console.log(token);
     auth.commit('authStateUpdate');
     auth.commit('login', token);
+}else{
+    auth.commit('authStateUpdateFalse');
 }
 
 

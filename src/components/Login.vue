@@ -90,7 +90,7 @@ export default {
       this.axios
       .get(url)
         .then(response => {
-          console.log(response.data.access_token)
+          console.log(response.data)
           this.inicio(response.data.access_token);
           this.$router.replace('/');
         })
@@ -110,7 +110,7 @@ export default {
           this.showDismissibleAlert = true;
           return false;
         }
-        this.link = 'https://auth.mercadolibre.com.ve/authorization?response_type=code&client_id='+this.appId+'&redirect_uri='+this.redirectUri+'';
+        this.link = 'https://auth.mercadolibre.com.co/authorization?response_type=code&client_id='+this.appId+'&redirect_uri='+this.redirectUri+'';
         window.open(this.link)
         this.show++;
         return true;
