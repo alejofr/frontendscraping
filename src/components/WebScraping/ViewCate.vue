@@ -1,10 +1,10 @@
 <template>
     <div class="h-100 w-100">
         <div class="row" style="padding: 30px 25px;margin:0;">
-            <div class="col-md-3 mb-3" v-for="product in categ" :key="product">
+            <div class="col-md-3 mb-3" v-for="(product, index) in categ" :key="index">
                 <div class="card">
-                    <input type="checkbox" class="custom-control-input position-absolute" id="card">
-                    <label class="card__content" id="card" for="card">
+                    <input type="checkbox" class="custom-control-input position-absolute" :id="index">
+                    <label class="card__content" id="card" :for="index">
                         <div class="card__header">
                             <div class="image-card">
                                 <img v-bind:src="product.img" alt="">
@@ -26,7 +26,7 @@
                                     <b-col cols="12" md="12">
                                         <div class="form-box">
                                             <b-form-input id="nameProd" type="text" v-model="product.price_col" required></b-form-input>
-                                            <label for="nameProd">$  Monto en pesos COL </label>
+                                            <label for="nameProd">$ Precio COL </label>
                                         </div>
                                     </b-col>
                                 </div>

@@ -11,18 +11,18 @@
                     </span>
                 </div>
                 <div v-if="item.children_categories == 'nonull' " class="right_item_cat">
-                    <span class="icon-arrow_ios"></span>
+                    <span class="icon-arrow_right"></span>
                 </div>
             </div>
             <ul class="submenuItems" v-if="item.children_categories == 'nonull' ">
-                <Categ  :id_cate="item.id"/>
+                <CategoriasMercadoLibre  :id_cate="item.id"/>
             </ul>
         </li>
     </div>
 </template>
 
 <script>
-import Categ from './CategoriasMercadoLibre.vue'
+
 
 export default {
     name: 'CategoriasMercadoLibre',
@@ -36,8 +36,21 @@ export default {
     },
     created(){
         if ( this.id_cate != ""  ) {
-             console.log("jadhajh");
-             console.log(this.id_cate)
+             if (localStorage.getItem('token')) {
+                let token = localStorage.getItem('token');
+                let url = process.env.VUE_APP_RUTA_API_MERCADOLIBRE+"?token="+token+"&id_cate="+this.id_cate;
+                this.axios
+                .get(url)
+                    .then(response => {
+                        console.log("navegando hijo");
+                        this.categorias = response.data;
+                        this.swtch = true;
+                        
+                    })
+                    .catch(error => {
+                    console.log(error)
+                });
+             }
         }else{
             if (localStorage.getItem('token')) {
                 let token = localStorage.getItem('token');
@@ -59,9 +72,6 @@ export default {
         }
         console.log("epa");
        
-    },
-   components:{
-        Categ
     },
 }
 </script>

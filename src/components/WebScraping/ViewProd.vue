@@ -33,13 +33,6 @@
                         <label for="nameProd">$  Monto en pesos COL </label>
                     </div>
                 </b-col>
-                <b-col cols="6" md="6" class="mt-4">
-                    <div class="form-box">
-                        <select v-model="categoria" name="categoria" id="categMercadoLibre">
-                            <!--<option v-for="(item, index) in categorias" v-bind:key="index" :value="item.id">{{ item.name }}</option>-->
-                        </select>
-                    </div>
-                </b-col>
             </b-row>
             <div class="container_img">
                 <carousel :items="5" :autoWidth="false" :nav="false"> 
@@ -59,28 +52,8 @@
                  </div>
             </div>
         </fieldset>
-        <fieldset v-show="show == 1">
-            <div class="mb-3" id="category_task">
-                <label class="form-label">Selecciona Una Categoría</label>
-                <div class="sc-ui-card-body mb-2">
-                    <div class="syi-searchable">
-                    <div class="sc-sov-carrousel">
-                        <div class="sc-sov-carrousel-element">
-                        <div class="searchableOptionValuesContainer">
-                            <div class="searchable-option-values-container__list">
-                            <div class="sc-ui-option-values">
-                                <ul class="ul-lis_cat">
-                                    <Categ :id_cate="id"/>
-                                </ul>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-            </div>
-            
+        <fieldset v-show="show == 1" >
+            <Categ v-bind:categorias="categorias" :categSeleccionadaVolver="onCategSeleccionadaVolver" :categSeleccionada="onSeleccion" :id_cate="id_cate" :name_cate="name_cate" />
             <div class="mt-3">
                 <div class="d-flex">
                     <div class="export-btn text-start w-50">
@@ -88,7 +61,7 @@
                     </div>
                     <div class="export-btn text-end w-50">
                          <button type="submit">
-                            Exportar a mercadolibre
+                            Exportar a Mercado Libre
                         </button>
                     </div>
                 </div>
@@ -98,14 +71,10 @@
     
 </template>
 
--a
- -b
-  -c
-    -d
-
 <script>
 import carousel from 'vue-owl-carousel';
-import Categ from './CategoriasMercadoLibre.vue'
+//import Categ from './CategoriasMercadoLibre.vue'
+import Categ from './Categorias.vue'
 
 
 export default {
@@ -121,16 +90,38 @@ export default {
             show:0,
             imagenes: [],
             id: '',
-            cat: false
+            cat: false,
+            id_cate: '',
+            name_cate: ''
         }
     },
    components:{
         carousel,
         Categ
     },
+    created(){
+        if (localStorage.getItem('token')) {
+            let token = localStorage.getItem('token');
+            let url = process.env.VUE_APP_RUTA_API_MERCADOLIBRE+"?token="+token;
+            this.axios
+            .get(url)
+                .then(response => {
+                    console.log("navegando");
+                    this.categorias = response.data;
+                    console.log(response.data);
+                })
+                .catch(error => {
+                console.log(error)
+            });
+        }
+    },
     methods: {
         next(){
-            this.show++;
+            
+            if ( this.product.name != "" && this.product.precio_usd &&  this.product.desp != "" &&  this.product.precio_col != "" && this.imagenes.length != 0 )
+                this.show++;
+            else 
+                alert("los valos no debe estar vacios");
         },
         prev(){
             this.show--;
@@ -160,19 +151,133 @@ export default {
                         'precio' : this.product.precio_col,
                         'images' : images
                     }
-
                     console.log(data);
                     this.axios
-                    .post(process.env.VUE_APP_RUTA_API_MERCADOLIBRE,data)
+                    .post(process.env.VUE_APP_RUTA_API_MERCADOLIBRE_POST,data)
                         .then(response => {
-                            //this.categorias = response.data;
-                            console.log(response)
+                            console.log(response.data);
+                            if ( response.data.error != null ){
+                                let cause = response.data.cause;
+                                for (let i = 0; i < cause.length; i++) {
+                                    
+                                    if ( cause[i].cause_id == 126 ){
+                                        alert("Error en Guardar Categoria, Por favor debe seleccionar Categorias correspondientes a hojas");
+                                    }else if( cause[i].cause_id == 134 ){
+                                        alert("Error en Guardar Titulo. el tamaño no puede superar los 60 caracteres");
+                                    }
+                                    
+                                }
+                            }else{
+                                alert("Se guardo con exito!.");
+                                location.reload();
+                            }
+                            
                         })
                         .catch(error => {
                         console.log(error)
                     });
                 }
             }
+        },
+        onSeleccion(datos, id) {
+            console.log('categoria seleccionada anterior: '+id)
+
+            
+            this.getCategoriasHijo(datos,'no', id);
+            this.categoria = datos;
+        },
+        onCategSeleccionadaVolver(id){
+            console.log('categoria seleccionada anterior - volver: '+id)
+            if ( id === 'padre' ){
+                id = '';
+                this.name_cate = '';
+                this.id_cate = '';
+                this.getCategoriasPadre();
+            }else{
+                let resp = this.getCategoriasHijoPadreFiltroVolver(id);
+                resp.then(response => {
+                    console.log(response);
+                    this.id_cate = ( response.path_from_root === "null" ) ? '' : response.path_from_root;
+                    this.name_cate = response.name;
+
+                    if ( this.id_cate != ""){
+                        console.log("aqui devolvio: "+this.id_cate)
+                        this.getCategoriasHijo(this.id_cate,'si', id);
+                    }else{
+                        id = '';
+                        this.name_cate = '';
+                        this.id_cate = '';
+                        this.getCategoriasPadre();
+                    }
+
+                    this.categoria = id;
+                });
+
+            }
+
+            
+            
+        },
+        getCategoriasPadre(){
+            let token = localStorage.getItem('token');
+            let url = process.env.VUE_APP_RUTA_API_MERCADOLIBRE+"?token="+token;
+            this.axios
+            .get(url)
+                .then(response => {
+                    console.log("navegando");
+                    this.categorias = response.data;
+                    console.log(response.data);
+                })
+                .catch(error => {
+                console.log(error)
+            });
+        },
+        getCategoriasHijo(datos,accion, id){
+            let token = localStorage.getItem('token');
+                let url = process.env.VUE_APP_RUTA_API_MERCADOLIBRE+"?token="+token+"&id_cate="+datos;
+                this.axios
+                .get(url)
+                    .then(response => {
+                        console.log("navegando hijo");
+                        if ( response.data.children_categories != "null" ){
+                            this.categorias = response.data.children_categories;
+                            if ( accion === 'no' ){
+                                this.name_cate = response.data.name;
+                                if ( id === '' ){
+                                    this.id_cate = 'padre';
+                                }else if ( (id === 'padre') || (id != '' && id != 'padre') ){
+                                    this.id_cate = response.data.id;
+                                }
+                            }
+                            
+                            console.log(response.data.children_categories.length);
+                        }
+                          
+                        
+                        
+                        
+                    })
+                    .catch(error => {
+                    console.log(error)
+                });
+        },
+        async getCategoriasHijoPadreFiltroVolver(id){
+            let respuesta = await new Promise((resolve,reject)=>{
+                let token = localStorage.getItem('token');
+                let url = process.env.VUE_APP_RUTA_API_MERCADOLIBRE+"?token="+token+"&id_anterior="+id;
+                this.axios
+                .get(url)
+                    .then(response => {
+                        resolve(response.data);
+                    })
+                    .catch(error => {
+                    console.log(error)
+                    reject(error)
+                     
+                });
+            });
+            
+           return respuesta;
         }
     }
 }
