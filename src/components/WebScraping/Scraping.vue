@@ -135,25 +135,33 @@ export default {
 
         },
         searchCateg: function(){
-            let url = this.searchCate;
             this.stateProd = false;
-            this.estado = true;
+            this.estado = false;
+            this.carga = true;
             console.log(url);
 
-            fetch(process.env.VUE_APP_RUTA_SERVE + "scraping-cate", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    url: url
-                })
-            }).then(response => response.json())
-            .then(data => { 
-                console.log(data.data)
-                this.categories = data.data;
+            let url = { 
+              'url' : this.searchCate
+            };
+        
+
+            this.axios.post(process.env.VUE_APP_RUTA_SERVE + "scraping-cate", url)
+            .then(response => {
+                console.log(response)
+                this.estado = true;
+                this.carga = false;
+                this.stateProd = false;
+
+                 console.log(response.data)
+                this.categories = response.data.data;
                 this.stateCate = true; 
-            })
+            }) 
+            .catch(error => {
+                this.carga = false;
+                alert('Ocurrio Un error,por favor intentar más tarde');
+                this.errorMessage = error.message;
+                console.error("There was an error!", this.errorMessage);
+            });
         }
 
   }

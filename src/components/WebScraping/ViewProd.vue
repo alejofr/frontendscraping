@@ -60,7 +60,7 @@
                         <b-button type="button" @click="prev" class="">Volver</b-button>
                     </div>
                     <div class="export-btn text-end w-50">
-                         <button type="submit">
+                         <button type="submit" >
                             Exportar a Mercado Libre
                         </button>
                     </div>
@@ -92,7 +92,8 @@ export default {
             id: '',
             cat: false,
             id_cate: '',
-            name_cate: ''
+            name_cate: '',
+            
         }
     },
    components:{
